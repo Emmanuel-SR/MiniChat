@@ -1,4 +1,4 @@
-package sockets;
+package minichat;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -19,30 +19,30 @@ public class Servidor extends Observable implements Runnable {
 	@Override
 	public void run() {
 
-		ServerSocket servidor = null;
-		Socket sc = null;
+		ServerSocket serverSocket = null;
+		Socket socket = null;
 		DataInputStream in;
 
 		try {
-			servidor = new ServerSocket(port);
-			System.out.println("Servidor inciado");
+			serverSocket = new ServerSocket(port);
+			System.out.println("Server is started.");
 
 			while (true) {
 
+				System.out.println("Server is waiting for client request...");
+				socket = serverSocket.accept();
+				
 				System.out.println("Client connected.");
-				sc = servidor.accept(); // waiting
-				in = new DataInputStream(sc.getInputStream());
-
-				String msg = in.readUTF(); // waiting
-
+				in = new DataInputStream(socket.getInputStream());
+				
+				String msg = in.readUTF();
 				System.out.println(msg);
 				
 				this.setChanged();
 				this.notifyObservers(msg);
 				this.clearChanged();
-
-				sc.close();
-
+				
+				socket.close();
 				System.out.println("Client disconected.");
 			}
 

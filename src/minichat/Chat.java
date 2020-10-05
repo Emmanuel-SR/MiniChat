@@ -1,36 +1,39 @@
-package sockets;
+package minichat;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Observable;
-import java.util.Observer;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-public class Chat2 extends JFrame implements Observer, ActionListener  {
+public class Chat extends JFrame implements ActionListener {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private String screenName;
+	private static final int PORT = 5000;
 
-	// GUI stuff
+	private String nickname;
+	private String host;
+
 	private JTextArea enteredText = new JTextArea(10, 32);
 	private JTextField typedText = new JTextField(32);
 
-	public Chat2(String screenName) {
-		this.screenName = screenName;
+	public Chat(String nickname, String host) {
+		this.nickname = nickname;
+		this.host = host;
 
-		Servidor s = new Servidor(6000);
-		s.addObserver(this);
+		Servidor s = new Servidor(PORT);
+		
+		s.addObserver((o, arg) -> this.enteredText.append((String) arg));
+		
 		Thread t = new Thread(s);
 		t.start();
 
@@ -38,7 +41,7 @@ public class Chat2 extends JFrame implements Observer, ActionListener  {
 	}
 
 	private void initGUI() {
-		// create GUI stuff
+
 		enteredText.setEditable(false);
 		enteredText.setBackground(Color.LIGHT_GRAY);
 		typedText.addActionListener(this);
@@ -47,32 +50,26 @@ public class Chat2 extends JFrame implements Observer, ActionListener  {
 		content.add(new JScrollPane(enteredText), BorderLayout.CENTER);
 		content.add(typedText, BorderLayout.SOUTH);
 
-		// display the window, with focus on typing box
-		setTitle("Chat Client 1.0: [" + this.screenName + "]");
+		setTitle("MiniChat Client v1.0: [" + this.nickname + "]");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
 		typedText.requestFocusInWindow();
 		setVisible(true);
 	}
 
-	// process TextField after user hits Enter
 	public void actionPerformed(ActionEvent e) {
-		String msg = "[" + screenName + "]: " + typedText.getText() + "\n";
+		String msg = "[" + nickname + "]: " + typedText.getText() + "\n";
 		typedText.setText("");
 		typedText.requestFocusInWindow();
 		this.enteredText.append(msg);
 
-		Client c = new Client(5000, msg);
+		Client c = new Client(host, PORT, msg);
 		Thread t = new Thread(c);
 		t.start();
 	}
 
-	@Override
-	public void update(Observable o, Object arg) {
-		this.enteredText.append((String) arg);
-	}
 
 	public static void main(String[] args) {
-		new Chat2("Client 2");
+		new Chat(args[0], args[1]);
 	}
 }

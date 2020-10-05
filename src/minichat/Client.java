@@ -1,4 +1,4 @@
-package sockets;
+package minichat;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,10 +8,12 @@ import java.util.logging.Logger;
 
 public class Client implements Runnable {
 
+	private String host;
 	private int port;
 	private String message;
 
-	public Client(int port, String message) {
+	public Client(String host, int port, String message) {
+		this.host = host;
 		this.port = port;
 		this.message = message;
 	}
@@ -19,18 +21,18 @@ public class Client implements Runnable {
 	@Override
 	public void run() {
 
-		final String HOST = "127.0.0.1";
-
 		DataOutputStream out;
 
 		try {
-			Socket sc = new Socket(HOST, port);
+			Socket socket = new Socket(host, port);
 
-			out = new DataOutputStream(sc.getOutputStream());
+			out = new DataOutputStream(socket.getOutputStream());
 
 			out.writeUTF(message);
 
-			sc.close();
+			out.close();
+
+			socket.close();
 
 		} catch (IOException e) {
 			Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, e);
